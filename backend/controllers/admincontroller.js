@@ -218,6 +218,7 @@ catch (error) {
           if (!hackathon) {
               return res.status(404).json({ error: 'Hackathon not found.' });
           }
+          
           const teamNameExists = await userSchema.findOne({
             "hackhist.hackid": id,
             "hackhist.tName": teamName,
@@ -271,7 +272,7 @@ catch (error) {
           };
           // // Ensure the team leader email is unique
           
-          await userSchema.findOneAndUpdate({ email: teamLeader.email }, teamLeaderUpdate);
+          const z=await userSchema.findOneAndUpdate({ email: teamLeader.email }, teamLeaderUpdate);
          
           for (const member of teamMembers) {
             const memberUpdate = {
@@ -287,7 +288,7 @@ catch (error) {
             };
             await userSchema.findOneAndUpdate({ email: member.email }, memberUpdate);
           }
-          
+          console.log('yaha tak');
           
           return res.status(201).json({
               message: 'Team registered successfully.',
@@ -497,11 +498,10 @@ const createContest=async(req,res)=>{
 const contestRegister=async(req,res)=>{
     const { email, contestId } = req.body;
     try {
-      console.log(email);
-      console.log(contestId);
+      
       // Check if user already registered
       const user = await userSchema.findOne({ email });
-      console.log(user);
+      
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
@@ -509,7 +509,7 @@ const contestRegister=async(req,res)=>{
         if (existingRegistration) {
             return res.status(400).json({ message: "Already registered for this contest." });
         }
-
+         
         // Add the contest registration to the user's cnthis array
         user.cnthis.push({
             cntid: contestId,
@@ -519,7 +519,7 @@ const contestRegister=async(req,res)=>{
      
       // Register user
      
-      await user.save();
+      await user.save({ validateModifiedOnly: true });
       console.log("Registration successful:", user);
       res.status(201).json({ message: "Registered successfully." });
     } catch (error) {

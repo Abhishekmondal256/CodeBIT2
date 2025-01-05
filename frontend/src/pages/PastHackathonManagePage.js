@@ -109,7 +109,11 @@ const PastHackathonManagePage = () => {
     }
 
     if (error) {
-        return <div className="text-center text-red-500">{"Result Not Yet Announced"}</div>;
+        return( <div className="bg-[#181C21] text-red-500 text-center py-10 min-h-screen flex items-center justify-center">
+      <p className="text-xl font-semibold text-red-500">
+    Result Not Yet Announced
+</p>
+    </div>)
     }
 
 
@@ -126,7 +130,7 @@ const PastHackathonManagePage = () => {
                     }`}
                     onClick={() => setViewType("Event Details")}
                 >
-                    Event Details
+                   Result Announcement
                 </button>
                 <button
                     className={`pb-1 text-lg font-semibold ${
@@ -136,7 +140,7 @@ const PastHackathonManagePage = () => {
                     }`}
                     onClick={() => setViewType("Registered Team")}
                 >
-                    Registered Team
+                    My Submission
                 </button>
             </div>
 

@@ -6,24 +6,29 @@ const Leaderboard = () => {
     const { contestId } = useParams();
     const { leaderboardData } = useContest();
     const [data, setData] = useState([]);
+    const [problems, setProblems] = useState([]);
 
     // updating the leaderboard data every 10 minutes
     useEffect(() => {
         // updating leaderboard data
-        const updateLeaderboardData = () => {
-            const newData = leaderboardData(contestId);
-            setData(newData);
+        const updateLeaderboardData = async () => {
+            console.log("update leaderboard is called", contestId)
+
+            const newData = await leaderboardData(contestId);
+            console.log(newData);
+            setData(newData.rankedUsers);
+            setProblems(newData.problems);
         };
 
         // Initial call
         updateLeaderboardData();
 
         // Set up the interval
-        const intervalId = setInterval(updateLeaderboardData, 10 * 60 * 1000);
+        const intervalId = setInterval(updateLeaderboardData, 600000);
 
         // Cleanup function
         return () => clearInterval(intervalId);
-    }, [leaderboardData, contestId])
+    }, [contestId])
 
 
     // Declare the data directly in the component
@@ -81,22 +86,25 @@ const Leaderboard = () => {
                         </div>
                     ) :
                     (
-                        <div className="border-2 border-[#393530] rounded-lg overflow-hidden p-6">
-                            <table className="w-full table-auto border-collapse border-spacing-y-0"> {/* Creates the gap between rows */}
+                        <div className="border-2 border-[#393530] rounded-lg overflow-auto p-6 scroll-color">
+                            <table className="w-full table-auto border-collapse border-spacing-y-0">
+                                {/* Creates the gap between rows */}
                                 {/* Table Header */}
-
-                                <tr
-                                    className="text-[#23d18b]"
-                                >
-                                    <th className="px-6 py-2 text-[20px]">Rank</th>
-                                    <th className="px-6 py-2 text-[20px]">Name</th>
-                                    <th className="px-6 py-2 text-[20px]">Score</th>
-                                    <th className="px-6 py-2 text-[20px]">Finish Time</th>
-                                    <th className="px-6 py-2 text-[20px]">Q1</th>
-                                    <th className="px-6 py-2 text-[20px]">Q2</th>
-                                    <th className="px-6 py-2 text-[20px]">Q3</th>
-                                    <th className="px-6 py-2 text-[20px]">Q4</th>
-                                </tr>
+                                <thead>
+                                    <tr
+                                        className="text-[#23d18b]"
+                                    >
+                                        <th className="px-6 py-2 text-[20px]">Rank</th>
+                                        <th className="px-6 py-2 text-[20px]">Name</th>
+                                        <th className="px-6 py-2 text-[20px]">Score</th>
+                                        <th className="px-6 py-2 text-[20px]">Finish Time</th>
+                                        {
+                                            problems.map((problem, index) => {
+                                                return <th className="px-6 py-2 text-[20px]" key={index}>Q{index + 1}</th>
+                                            })
+                                        }
+                                    </tr>
+                                </thead>
 
                                 {/* Table Body */}
                                 <tbody className="font-semibold">
@@ -110,7 +118,7 @@ const Leaderboard = () => {
                                             <td
                                                 className="px-6 py-4 rounded-tl-xl rounded-bl-xl" // Green text for rank
                                             >
-                                                {index}
+                                                {index + 1}
                                             </td>
                                             <td
                                                 className="px-6 py-4" // Green text for name

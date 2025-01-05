@@ -55,16 +55,16 @@ const ContestProblemPage = () => {
         if (id) {
             fetchContestData();
             // updating leaderboard data
-            const updateLeaderboardData = () => {
-                const newData = leaderboardData(id);
-                setRankingsData(newData);
+            const updateLeaderboardData = async() => {
+                const newData = await leaderboardData(id);
+                setRankingsData(newData.rankedUsers);
             };
 
             // Initial call
             updateLeaderboardData();
 
             // Set up the interval
-            const intervalId = setInterval(updateLeaderboardData, 10 * 60 * 1000);
+            const intervalId = setInterval(updateLeaderboardData, 600000);
 
             // Cleanup function
             return () => clearInterval(intervalId);
@@ -98,7 +98,12 @@ const ContestProblemPage = () => {
                             </div>
 
                             <button
-                                onClick={() => <Navigate to={`/${id}/${problem._id}/codeEditor}`} state={{problem: problem, name:name}}/>}
+                               onClick={() => navigate(`/${id}/${problem._id}/codeEditor`, {
+                                state: {
+                                    problem: problem,
+                                    name: name
+                                }
+                            })}
                                 className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-[#0DB276] hover:bg-[#0a9160] text-white py-2 px-6 rounded-lg"
                             >
                                 Solve →

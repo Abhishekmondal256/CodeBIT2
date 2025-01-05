@@ -13,14 +13,20 @@ export const RegTimer = ({ deadline, compName }) => {
 
     const getTime = (deadline) => {
         const time = Date.parse(deadline) - Date.now();
-        setDays(Math.floor(time / (1000 * 60 * 60 * 24)));
-        setHours(Math.floor((time / (1000 * 60 * 60)) % 24));
-        setMinutes(Math.floor((time / (1000 * 60)) % 60));
-        setSeconds(Math.floor((time / 1000) % 60));
-
+        const remainingDays = Math.floor(time / (1000 * 60 * 60 * 24));
+        const remainingHours = Math.floor((time / (1000 * 60 * 60)) % 24);
+        const remainingMinutes = Math.floor((time / (1000 * 60)) % 60);
+        const remainingSeconds = Math.floor((time / 1000) % 60);
+    
+        setDays(remainingDays);
+        setHours(remainingHours);
+        setMinutes(remainingMinutes);
+        setSeconds(remainingSeconds);
         // Check for the exact 30-minute mark
-        if (days === 0 && hours === 0 && minutes === 30 && seconds === 0 && compName === "contest") {
+        if (remainingDays === 0 && remainingHours === 0 && remainingMinutes === 10 && remainingSeconds === 0 && compName === "contest") {
+            console.log("horha");
             instanceCreate();
+            console.log("hogya");
         }
     };
 
@@ -55,28 +61,28 @@ export const RegTimer = ({ deadline, compName }) => {
 };
 
 
-export const RunningTimer = ({ deadline, compName}) => {
-    const [hours, setHours] = useState(0);
-    const [minutes, setMinutes] = useState(0);
-    const [seconds, setSeconds] = useState(0);
+export const RunningTimer = ({ compName }) => {
+    const [timeLeft, setTimeLeft] = useState(3 * 60 * 60); // 3 hours in seconds
 
-    const {instanceDelete} = useInstance();
+    const { instanceDelete } = useInstance();
 
-    const getTime = (deadline) => {
-        const time = Date.parse(deadline) - Date.now();
-        setHours(Math.floor(time / (1000 * 60 * 60) % 24));
-        setMinutes(Math.floor(time / (1000 * 60) % 60));
-        setSeconds(Math.floor(time / (1000) % 60));
-
-        // Check for the ending of contest
-        if (hours === 0 && minutes === 0 && seconds === 0 && compName === "contest") {
+    const getTime = () => {
+        if (timeLeft <= 0 && compName === "contest") {
             instanceDelete();
         }
+
+        setTimeLeft(prevTime => (prevTime > 0 ? prevTime - 1 : 0));
     };
+
     useEffect(() => {
-        const interval = setInterval(() => getTime(deadline), 1000);
+        const interval = setInterval(getTime, 1000);
         return () => clearInterval(interval);
-    }, [deadline]);
+    }, []);
+
+    const hours = Math.floor(timeLeft / 3600);
+    const minutes = Math.floor((timeLeft % 3600) / 60);
+    const seconds = timeLeft % 60;
+
     return (
         <div className="text-sm text-[#0DB256]">
             {(hours < 3 && hours >= 0) ? (
@@ -90,5 +96,4 @@ export const RunningTimer = ({ deadline, compName}) => {
             )}
         </div>
     );
-
-};;
+};
