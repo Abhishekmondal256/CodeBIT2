@@ -35,7 +35,8 @@ const ContestHackathonElement = ({
     const registrationClosed = registrationEnd && registrationEnd < currentDate;
     const hackathonNotStarted = hackathonStart && hackathonStart > currentDate;
 
-const contestRunning =hackathonStart && hackathonEnd && hackathonStart <= currentDate && hackathonEnd >= currentDate; // Check if contest is running
+const contestRunning =hackathonStart <= currentDate && hackathonEnd >=currentDate; // Check if contest is running
+
 
     const hackathonEnded = hackathonEnd && hackathonEnd < currentDate;
     let deadline;

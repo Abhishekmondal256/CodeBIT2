@@ -1,6 +1,7 @@
 const VerificationSchema=require("../models/VerificationSchema");
 const HackathonSchema =require("../models/HackathonSchema");
 const userSchema=require("../models/userSchema");
+const mongoose =require("mongoose");
 const formidable = require('formidable');
 const xlsx = require('xlsx');
 const fs = require('fs');
@@ -218,7 +219,17 @@ catch (error) {
           if (!hackathon) {
               return res.status(404).json({ error: 'Hackathon not found.' });
           }
-          
+          const teamLeaderExists = await userSchema.findOne({ email: teamLeader.email });
+          if (!teamLeaderExists) {
+            return res.status(400).json({ error: "Team leader email is not registered." });
+          }
+          for (const member of teamMembers) {
+            const memberExists = await userSchema.findOne({ email: member.email });
+            if (!memberExists) {
+              return res.status(400).json({ error: `Team member email ${member.email} is not registered.` });
+            }
+          }
+      
           const teamNameExists = await userSchema.findOne({
             "hackhist.hackid": id,
             "hackhist.tName": teamName,
@@ -261,10 +272,11 @@ catch (error) {
                 submiss: [
                   {
                     theme: selectedProblem,
-                    desc:"",
-                    githubLink: "",
+                    desc:"NA",
+                    githubLink: "NA",
                     videoLink: "",
                     liveLink: "",
+                    pname:"NA"
                   },
                 ],
               },
@@ -285,10 +297,11 @@ catch (error) {
                   submiss: [
                     {
                       theme: selectedProblem,
-                      desc:"",
-                      githubLink: "",
+                      desc:"NA",
+                      githubLink: "NA",
                       videoLink: "",
                       liveLink: "",
+                      pname:"NA"
                     },
                   ],
                 },
@@ -342,7 +355,6 @@ const projectSubmit=async(req,res)=>{
       } = req.body;
    
     try {
-    
       const userRecord = await userSchema.findOne({
         "hackhist.hackid": hackathonId,
         "hackhist.teamLeader.email":  userId ,
@@ -351,7 +363,7 @@ const projectSubmit=async(req,res)=>{
     if (!userRecord) {
         return res.status(404).json({ message: "Hackathon not found in user history or You'r not an Team Leader" });
     }
-    console.log(userRecord);
+    
     const hackathon = userRecord.hackhist.find(
       (hack) => hack.hackid === hackathonId
   );
@@ -365,66 +377,51 @@ const projectSubmit=async(req,res)=>{
         .status(400)
         .json({ message: "No submissions found to update." });
 }
-
-const submission = hackathon.submiss[0];
-submission.pname=projectName||submission.pname;
-submission.desc = description || submission.desc;
-submission.githubLink = githubLink || submission.githubLink;
-submission.videoLink = videoLink || submission.videoLink;
-submission.liveLink = liveLink || submission.liveLink;
-
-// Save the updated user record
-await userRecord.save();
-const teamMembersEmails = [
-  hackathon.teamLeader.email,
-  ...hackathon.teamMembers.map((member) => member.email),
-];
-const updatePromises = teamMembersEmails.map(async (email) => {
-  const memberRecord = await userSchema.findOne({
-      email,
-      "hackhist.hackid": hackathonId,
-  });
-
-  if (memberRecord) {
-      const memberHackathon = memberRecord.hackhist.find(
-          (hack) => hack.hackid === hackathonId
-      );
-
-      if (memberHackathon) {
-          if (!memberHackathon.submiss || memberHackathon.submiss.length === 0) {
-              memberHackathon.submiss = [{}];
-          }
-
-          const memberSubmission = memberHackathon.submiss[0];
-          memberSubmission.pname = projectName || memberSubmission.pname;
-          memberSubmission.desc = description || memberSubmission.desc;
-          memberSubmission.githubLink =
-              githubLink || memberSubmission.githubLink;
-          memberSubmission.videoLink =
-              videoLink || memberSubmission.videoLink;
-          memberSubmission.liveLink = liveLink || memberSubmission.liveLink;
-
-          await memberRecord.save();
-      }
-  }
-});
-await Promise.all(updatePromises);
+      const teamMembersEmails = [
+        hackathon.teamLeader.email,
+        ...hackathon.teamMembers.map((member) => member.email),
+      ];
+      
+      const updatePromises = teamMembersEmails.map(async (email) => {
+        const memberRecord = await userSchema.findOne({
+            email,
+            "hackhist.hackid": hackathonId,
+        });
+      
+        if (memberRecord) {
+            const memberHackathon = memberRecord.hackhist.find(
+                (hack) => hack.hackid === hackathonId
+            );
+      
+            if (memberHackathon) {
+                if (!memberHackathon.submiss || memberHackathon.submiss.length === 0) {
+                    memberHackathon.submiss = [{}];
+                }
+      
+                const memberSubmission = memberHackathon.submiss[0];
+                memberSubmission.pname = projectName || memberSubmission.pname ;
+                memberSubmission.desc = description || memberSubmission.desc || "";
+                memberSubmission.githubLink =
+                    githubLink || memberSubmission.githubLink || "";
+                memberSubmission.videoLink =
+                    videoLink || memberSubmission.videoLink || "";
+                memberSubmission.liveLink = liveLink || memberSubmission.liveLink ||"";
+      console.log("sub"+memberSubmission);
+                await memberRecord.save();
+            }
+        }
+      });
+      await Promise.all(updatePromises);
+ 
 
 
 
+
+           
 console.log("ho hi gya");
 res.status(200).json({
   message: "Project updated successfully!",
-  project: {
-      projectName:submission.pname,
-      description: submission.desc,
-      githubLink: submission.githubLink,
-      videoLink: submission.videoLink,
-      liveLink: submission.liveLink,
-      hackathonId,
-      teamLeader: hackathon.teamLeader,
-      teamMembers: hackathon.teamMembers,
-  },
+ 
 });
         
      
@@ -473,7 +470,9 @@ const checkProjectSubmission = async (req, res) => {
 // Check if there's a submission
 const submission = hackathon.submiss.find(
   (sub) =>
-      sub.desc && sub.githubLink 
+    sub.desc !== "NA" &&
+  sub.pname !== "NA" &&
+  sub.githubLink !== "NA"
 );
 
 if (submission) {
