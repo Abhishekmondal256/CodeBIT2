@@ -22,8 +22,8 @@ const ContestHackathonTable = ({ UP, feat }) => {
 
                     const filteredHackathons = hackathonData.filter(h =>
                         UP === "upcoming"
-                            ? new Date(h.hackTime.start) > currentDate
-                            : new Date(h.hackTime.start) <= currentDate
+                            ? new Date(h.hackTime.end) > currentDate
+                            : new Date(h.hackTime.end) <= currentDate
                     );
 
                     setHackathons(filteredHackathons);
@@ -48,8 +48,8 @@ const ContestHackathonTable = ({ UP, feat }) => {
 
                     const filteredContests = contestData.filter(c =>
                         UP === "upcoming"
-                            ? new Date(c.startTime) > currentDate
-                            : new Date(c.startTime) <= currentDate
+                            ? new Date(c.endTime) > currentDate
+                            : new Date(c.endTime) <= currentDate
                     );
 
                     setContests(filteredContests);

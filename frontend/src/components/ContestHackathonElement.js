@@ -33,7 +33,7 @@ const ContestHackathonElement = ({
     const hackathonEnd = hackathonTimeline?.end ? new Date(hackathonTimeline.end) : null;
     const registrationNotStarted = registrationStart && registrationStart > currentDate;
     const registrationClosed = registrationEnd && registrationEnd < currentDate;
-    
+    const hackathonNotStarted = hackathonStart && hackathonStart > currentDate;
 
 const contestRunning =hackathonStart && hackathonEnd && hackathonStart <= currentDate && hackathonEnd >= currentDate; // Check if contest is running
 
@@ -160,8 +160,8 @@ const contestRunning =hackathonStart && hackathonEnd && hackathonStart <= curren
     return (
         <div className=" relative flex items-center justify-between text-sm lg:text-base pt-6 px-4 pb-8 border border-[#293139] bg-[#21272e] rounded-lg h-full lg:gap-8">
             {userType === "admin" && (
-                (compName === "hackathon" && registrationNotStarted) ||
-                (compName === "contest" && currentDate < hackathonStart)
+                (compName === "hackathon" &&  hackathonNotStarted) ||
+                (compName === "contest" && currentDate < hackathonEnd)
             ) && (
                     <div className="flex gap-4 px-2 py-1 absolute right-8 top-4 ">
                         <img

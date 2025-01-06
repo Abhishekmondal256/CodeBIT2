@@ -70,7 +70,12 @@ const ProjectSubmission = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to submit project');
+                if (response.status === 404 && result.message.includes("not an Team Leader")) {
+                    alert("You are not the team leader for this hackathon.");
+                } else {
+                    alert(result.message || "Failed to submit project.");
+                }
+                throw new Error(result.message || "Submission failed");
             }
 
             const result = await response.json();

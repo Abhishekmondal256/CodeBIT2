@@ -25,7 +25,7 @@ const FormHackathon = () => {
             email: userId, // Prefill Team Leader Email from userId
             phone: "",
         },
-        teamMembers: [{ name: "", email: "", phone: "" }],
+        teamMembers:[],
         selectedProblem: "",
         
     });
@@ -72,6 +72,12 @@ const FormHackathon = () => {
             temp[pathArray[pathArray.length - 1]] = value;
             return updatedData;
         });
+    };
+    const handleRemoveTeamMember = (index) => {
+        setFormData((prev) => ({
+            ...prev,
+            teamMembers: prev.teamMembers.filter((_, i) => i !== index),
+        }));
     };
 
     const handleAddTeamMember = () => {
@@ -229,6 +235,13 @@ const FormHackathon = () => {
                                         required
                                         className="w-1/3 p-3 rounded bg-[#212830] border border-transparent placeholder-slate-500 focus:border-[#0DB276] focus:outline-none"
                                     />
+                                    <button
+                type="button"
+                onClick={() => handleRemoveTeamMember(index)}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded"
+            >
+                Remove
+            </button>
                                 </div>
                             ))}
                             <button
