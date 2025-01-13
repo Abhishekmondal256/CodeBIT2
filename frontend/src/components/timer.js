@@ -66,3 +66,57 @@ export const RegTimer = ({ deadline, compName }) => {
         </div>
     );
 };
+export const RunningTimer = ({ deadline, compName }) => {
+    const [timeLeft, setTimeLeft] = useState(Date.parse(deadline) - Date.now());
+    const [hasDeletedInstance, setHasDeletedInstance] = useState(false);
+
+    const { instanceDelete } = useInstance();
+
+    useEffect(() => {
+        const updateTimer = () => {
+            const remainingTime = Date.parse(deadline) - Date.now();
+            setTimeLeft(remainingTime);
+
+            // Trigger instanceDelete if the timer reaches zero and compName is "contest"
+            if (remainingTime <= 0) {
+                if (compName === "contest" && !hasDeletedInstance) {
+                    console.log("instance delte");
+                    setHasDeletedInstance(true);
+                    // instanceDelete();
+                }
+                clearInterval(interval);
+            }
+        };
+
+        const interval = setInterval(updateTimer, 1000);
+
+        return () => clearInterval(interval);
+    }, [deadline, compName, instanceDelete]);
+
+    // Convert timeLeft (in milliseconds) to hours, minutes, and seconds
+    const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
+    const seconds = Math.floor((timeLeft / 1000) % 60);
+
+    // Check if the time is within the desired range (greater than 0 and ≤ 3 hours)
+    const isValidTime = timeLeft > 0 
+    // && timeLeft <= 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+
+    return (
+        <div className="text-sm text-[#0DB256]s tracking-widest">
+            {isValidTime ? ( // Display only if time is within the valid range
+                <div className="flex">
+                    <p>{hours.toString().padStart(2, '0')}h</p>
+                    <p>{minutes.toString().padStart(2, '0')}m</p>
+                    <p>{seconds.toString().padStart(2, '0')}s</p>
+                </div>
+            ) : (
+                <div className="flex">
+                    <p>00h</p>
+                    <p>00m</p>
+                    <p>00s</p>
+                </div>
+            )}
+        </div>
+    );
+};
